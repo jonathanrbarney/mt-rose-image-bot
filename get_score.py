@@ -42,7 +42,7 @@ predictor.load_state_dict(pt_state)
 predictor.to(device)
 predictor.eval()
 
-clip_model, clip_preprocess = clip.load("ViT-L/14", device=device, download_root=".")
+clip_model, clip_preprocess = clip.load("ViT-L/14", device=device)
 
 
 def get_image_features(
