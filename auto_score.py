@@ -83,7 +83,12 @@ def get_today_folder():
 def get_sunrise_sunset_in_utc(now_time):
     local_date = now_time.date()
     sunrise = sun.get_sunrise_time(local_date)
-    sunset = sun.get_sunrise_time(local_date)
+    sunset = sun.get_sunset_time(local_date)
+
+    # if sunset time is before sunrise time, then use the next days sunset
+    if sunset < sunrise:
+        sunset = sun.get_sunset_time(local_date + timedelta(days=1))
+
     return sunrise, sunset
 
 
@@ -114,6 +119,11 @@ def monitor_streams(interval):
         current_time = datetime.utcnow().replace(tzinfo=timezone.utc)
         sunrise, sunset = get_sunrise_sunset_in_utc(current_time)
 
+        # print debug information about timings
+        print(f"Current time: {current_time}")
+        print(f"Sunrise: {sunrise}")
+        print(f"Sunset: {sunset}")
+
         if (
             sunrise - timedelta(hours=SUNRISE_OFFSET_HOURS)
             < current_time
@@ -142,10 +152,12 @@ def monitor_streams(interval):
                     print(f"Error calculating score for {temp_filename}: {e}")
                     os.remove(temp_filename)
 
-        print("-" * 80)
-        print(f"Top 3 images at {time.strftime('%H:%M:%S')}:")
-        for i, img in enumerate(top_images):
-            print(f"Top {i + 1}: {img['path']} with score {img['score']}")
+            print("-" * 80)
+            print(f"Top 3 images at {time.strftime('%H:%M:%S')}:")
+            for i, img in enumerate(top_images):
+                print(f"Top {i + 1}: {img['path']} with score {img['score']}")
+        else:
+            print("Sleeping until tomorrow...")
 
         for file_path in os.listdir(today_folder):
             if os.path.join(today_folder, file_path) not in [

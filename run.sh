@@ -1,0 +1,1 @@
+docker build . -t mt-rose-image-bot:latest && docker run --rm -it -v ./images:/app/images mt-rose-image-bot:latest
